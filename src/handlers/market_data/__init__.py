@@ -1,0 +1,2 @@
+from src.handlers.market_data.market_data_handler_binance import MarketDataHandlerBinance
+from src.handlers.market_data.market_data_handler_hyper import MarketDataHandlerHyper
