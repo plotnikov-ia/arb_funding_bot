@@ -34,7 +34,7 @@ class Strategy:
         account_data_store_binance: AccountDataStoreBinance
     ) -> None:
         while not stop_event.is_set():
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.01)
             
             self.order_manager.update(
                 store_binance=account_data_store_binance, 
