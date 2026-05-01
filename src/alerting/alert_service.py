@@ -31,7 +31,7 @@ async def _send(json_data: dict):
 class AlertTradingService:
     def __init__(self) -> None:
         self.last_alert_time = 0
-        self.alert_interval = 1 * 60  # 30 минут в секундах
+        self.alert_interval = 10 * 60  # 30 минут в секундах
         
     def update(self, state_binance, state_hyper, state_blockchain):
         now = time.time()
