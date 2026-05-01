@@ -3,9 +3,9 @@ import time
 
 from src.security import Secrets
 
-from src.managers import BinanceManager, HyperManager
+from src.managers import BinanceManager, HyperManager, BlockchainManager
 
-from src.entities.account_data.account_state import AccountState
+from src.entities.account_data.account_state import AccountState, BlockchainState
 
 from src.stores import MarketDataStore, AccountDataStoreBinance, AccountDataStoreHyper
 
@@ -40,6 +40,10 @@ async def main() -> None:
     market_data_handler_binance = MarketDataHandlerBinance(store=market_data_store)
     market_data_handler_hyper = MarketDataHandlerHyper(store=market_data_store)
     
+    LOG_ENABLED and log_event("main", action="init blockchain account")
+    blockchain_manager = BlockchainManager(secrets=secrets)
+    account_state_blockchain = await blockchain_manager.init_state(BlockchainState())
+    
     LOG_ENABLED and log_event("main", action="init hyper account")
     
     hyper_manager = HyperManager(secrets=secrets)
@@ -55,6 +59,7 @@ async def main() -> None:
     account_data_handler_binance = AccountHandlerBinance(store=account_data_store_binance)
     
     strategy = Strategy(
+        blockchain_manager=blockchain_manager,
         binance_manager=binance_manager,
         hyper_manager=hyper_manager,
     )
@@ -83,6 +88,7 @@ async def main() -> None:
             strategy.step(
                 stop_event,
                 market_data_store,
+                account_state_blockchain,
                 account_data_store_hyper,
                 account_data_store_binance
             )

@@ -2,6 +2,7 @@ import os
 import time
 import asyncio
 import httpx
+import textwrap
 from dotenv import load_dotenv
 
 
@@ -30,13 +31,36 @@ async def _send(json_data: dict):
 class AlertTradingService:
     def __init__(self) -> None:
         self.last_alert_time = 0
-        self.alert_interval = 30 * 60  # 30 минут в секундах
+        self.alert_interval = 1 * 60  # 30 минут в секундах
         
-    def update(self, state_binance, state_hyper):
+    def update(self, state_binance, state_hyper, state_blockchain):
         now = time.time()
 
         if now - self.last_alert_time >= self.alert_interval:
-            send_alert(alert_type="info", json_data=state_binance.to_dict())
-            send_alert(alert_type="info", json_data=state_hyper.to_dict())
+
+            message = textwrap.dedent(f"""
+                🟡 --- Binance ---
+                margin ratio: {state_binance.margin_ratio:.2f}
+                equity: {state_binance.equity:.2f}
+                quote_position: {state_binance.quote_position:.2f}
+                base_position: {state_binance.base_position:.2f}
+                quote_position_spot: {state_binance.quote_position_spot:.2f}
+                locked_quote_position_spot: {state_binance.locked_quote_position_spot:.2f}
+
+                🟢 --- Hyperliquid ---
+                margin ratio: {state_hyper.margin_ratio:.2f}
+                equity: {state_hyper.equity:.2f}
+                quote_position: {state_hyper.quote_position:.2f}
+                base_position: {state_hyper.base_position:.2f}
+
+                🔵 --- Blockchain ---
+                amount usdc: {state_blockchain.amount_usdc:.2f}
+            """)
+            
+            json_data = {
+                "str_message": message
+            }
+            
+            send_alert(alert_type="info", json_data=json_data)
             
             self.last_alert_time = now

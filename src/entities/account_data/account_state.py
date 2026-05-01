@@ -1,6 +1,14 @@
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, Optional
 
+@dataclass
+class BlockchainState:
+    ts: Optional[int] = None
+    amount_usdc: Optional[float] = 0.0
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
 
 @dataclass
 class AccountState:

@@ -1,24 +1,28 @@
 import os
-import time
-import math
 import asyncio
-import numpy as np
-from decimal import Decimal
-from collections import deque
+import time
+from dotenv import load_dotenv
 
-
+from src.entities import BlockchainState
 from src.stores import AccountDataStoreBinance, AccountDataStoreHyper, MarketDataStore
-from src.managers import BinanceManager, HyperManager, OrderManager, RiskManager
+from src.managers import BlockchainManager, BinanceManager, HyperManager, OrderManager, RiskManager
 from src.logging import LOG_ENABLED, log_event
 from src.alerting import AlertTradingService
+
+
+load_dotenv()
+
+STRATEGY_FREQUENCY = float(os.getenv("STRATEGY_FREQUENCY"))
 
 
 class Strategy:
     def __init__(
         self, 
+        blockchain_manager: BlockchainManager,
         binance_manager: BinanceManager,
         hyper_manager: HyperManager,
     ) -> None:
+        self.blockchain_manager = blockchain_manager
         self.binance_manager = binance_manager
         self.hyper_manager = hyper_manager
         self.risk_manager = RiskManager()
@@ -30,16 +34,18 @@ class Strategy:
         self,
         stop_event,
         market_data_store: MarketDataStore,
+        account_state_blockchain: BlockchainState,
         account_data_store_hyper: AccountDataStoreHyper,
         account_data_store_binance: AccountDataStoreBinance
     ) -> None:
         while not stop_event.is_set():
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(STRATEGY_FREQUENCY)
             
-            self.order_manager.update(
-                store_binance=account_data_store_binance, 
-                store_hyper=account_data_store_hyper,
-            )
+            self.order_manager.update(store_binance=account_data_store_binance, store_hyper=account_data_store_hyper)
+            
+            self.blockchain_manager.update_state(state=account_state_blockchain)
+            self.binance_manager.update_state(state=account_data_store_binance.state)
+            self.hyper_manager.update_state(state=account_data_store_hyper.state)
             
             if market_data_store.bbo_binance is None \
                 or market_data_store.orderbook_binance is None \
@@ -96,7 +102,10 @@ class Strategy:
             
             # print("="*50)
             
-            self.alert_trading_service.update(state_binance=account_data_store_binance.state, state_hyper=account_data_store_hyper.state)
+            
+            self.alert_trading_service.update(
+                state_binance=account_data_store_binance.state, state_hyper=account_data_store_hyper.state, state_blockchain=account_state_blockchain
+            )
             
             # print(f"bbo_binance: {market_data_store.bbo_binance}")
             # print(f"bbo_hyper: {market_data_store.bbo_hyper}")
