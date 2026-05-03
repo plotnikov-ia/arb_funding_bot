@@ -202,7 +202,7 @@ class Strategy:
                     self.order_manager.create_limit_order_binance(
                         store_binance,
                         is_long=True,
-                        qty=0.02,
+                        qty=self.risk_manager.deal_size,
                         price=my_bid_price,
                     )
                     
@@ -221,7 +221,7 @@ class Strategy:
                     self.order_manager.create_limit_order_binance(
                         store_binance,
                         is_long=False,
-                        qty=0.02,
+                        qty=self.risk_manager.deal_size,
                         price=my_ask_price,
                     )
                     
