@@ -73,6 +73,7 @@ class BinanceManager:
         state.unrealized_pnl = float(raw_risk_info[0]["unRealizedProfit"])
         
         state.leverage = float(raw_risk_info[0]["leverage"])
+        
         state.liquidation_price = float(raw_risk_info[0]["liquidationPrice"])
                 
         state.equity = state.quote_position + state.unrealized_pnl
@@ -179,14 +180,7 @@ class BinanceManager:
         self,
         asset: str,
         amount: float,
-    ):
-        
-        if self.assets_info is None:
-            return None
-        
-        if self.assets_info[asset]["walletBalance"] < amount:
-            return None
-        
+    ):  
         data = await self.api_client.transfer_perp_to_spot(
             asset=asset,
             amount=amount
@@ -196,19 +190,7 @@ class BinanceManager:
         self,
         asset: str,
         amount: float,
-        all: bool = False,
-    ):
-        if all:
-            amount = self.quote_position
-        
-        if amount <= 1:
-            return None
-        
-        amount = math.floor(amount)
-        
-        if self.quote_position is None or self.quote_position < amount:
-            return None
-        
+    ):  
         data = await self.api_client.transfer_spot_to_perp(
             asset=asset, amount=amount
         )
@@ -277,16 +259,9 @@ class BinanceManager:
         
     async def withdraw(
         self,
-        amount: float,
-    ):
-        if self.assets_info is None:
-            return None
-        
-        if self.assets_info["USDC"]["free"] < amount:
-            print("insufficient funds for withdrawal")
-            return
-        
-        data = await self.api_client.withdraw(amount=amount)
+        amount_in_usdc: float,
+    ):  
+        data = await self.api_client.withdraw(amount=amount_in_usdc)
         
                 
         

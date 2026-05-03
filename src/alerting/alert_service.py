@@ -11,6 +11,8 @@ from src.logging import LOG_ENABLED, log_event
 load_dotenv()
 
 ALERT_URL = os.getenv("ALERT_URL", "")
+ALERT_INTERVAL_SECONDS = float(os.getenv("ALERT_INTERVAL_SECONDS"))
+
 
 def send_alert(alert_type: str, json_data: dict):
     LOG_ENABLED and log_event("alert_service", action="send tg alert")
@@ -31,12 +33,11 @@ async def _send(json_data: dict):
 class AlertTradingService:
     def __init__(self) -> None:
         self.last_alert_time = 0
-        self.alert_interval = 10 * 60  # 30 минут в секундах
         
     def update(self, state_binance, state_hyper, state_blockchain):
         now = time.time()
 
-        if now - self.last_alert_time >= self.alert_interval:
+        if now - self.last_alert_time >= ALERT_INTERVAL_SECONDS:
 
             message = textwrap.dedent(f"""
                 🟡 --- Binance ---

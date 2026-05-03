@@ -364,7 +364,7 @@ class BinanceApiClient:
         recv_window_ms: int = 5000,
     ):
         params = {
-            "coin": "USDC",
+            "coin": "usdc",
             "address": OPERATING_WALLET_ADDRESS,
             "amount": amount,
             "network": "ARBITRUM",
@@ -392,86 +392,3 @@ class BinanceApiClient:
                 print(data)
 
         return data
-    
-    async def deposit(
-        self,
-        amount: float,
-        recv_window_ms: int = 5000,
-    ):
-        # --- 1. получить адрес депозита Binance ---
-        params = {
-            "coin": "USDC",
-            "network": "ARBITRUM",
-            "recvWindow": recv_window_ms,
-            "timestamp": int(time.time() * 1000),
-        }
-
-        query = urlencode(params)
-        signature = self.sign(query)
-
-        url = f"{BINANCE_SPOT_BASE_URL}/sapi/v1/capital/deposit/address?{query}&signature={signature}"
-
-        headers = {"X-MBX-APIKEY": self.secrets.get("BINANCE_HMAC_API_KEY")}
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers) as resp:
-                raw = await resp.read()
-
-                if resp.status != 200:
-                    raise RuntimeError(f"deposit addr error: {resp.status} {raw}")
-
-                data = orjson.loads(raw)
-
-        deposit_address = Web3.to_checksum_address(data["address"])
-        
-        
-        ERC20_ABI = [
-            {
-                "name": "transfer",
-                "type": "function",
-                "stateMutability": "nonpayable",
-                "inputs": [
-                    {"name": "to", "type": "address"},
-                    {"name": "value", "type": "uint256"},
-                ],
-                "outputs": [{"name": "", "type": "bool"}],
-            }
-        ]
-
-        # --- 2. отправить USDC через Arbitrum ---
-        w3 = Web3(Web3.HTTPProvider(ARB_RPC))
-        account = Account.from_key(self.secrets.get("OPERATING_WALLET_PRIVATE_KEY"))
-
-        contract = w3.eth.contract(
-            address=Web3.to_checksum_address(USDC_ARB_ADDRESS),
-            abi=ERC20_ABI
-        )
-
-        deposit_address = Web3.to_checksum_address(deposit_address)
-
-        amount_wei = int(amount * 1_000_000)
-        
-        base_fee = w3.eth.get_block("latest")["baseFeePerGas"]
-        priority_fee = w3.to_wei(0.01, "gwei")
-        max_fee = base_fee * 2 + priority_fee
-
-        tx = contract.functions.transfer(
-            deposit_address,
-            amount_wei
-        ).build_transaction({
-            "from": account.address,
-            "nonce": w3.eth.get_transaction_count(account.address),
-            "gas": 100000,
-            "maxFeePerGas": max_fee,
-            "maxPriorityFeePerGas": priority_fee,
-            "chainId": 42161,
-            "type": 2,
-        })
-
-        signed_tx = account.sign_transaction(tx)
-        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
-
-        return {
-            "deposit_address": deposit_address,
-            "tx_hash": tx_hash.hex(),
-        }

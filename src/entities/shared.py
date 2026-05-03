@@ -1,4 +1,19 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+from typing import Optional, Dict, Any
+
+
+@dataclass
+class Rebalance:
+    to_exchange: str
+    amount_usdc: float
+    wip: bool
+    on_blockchain: bool
+    timestamp_create: int
+    timestamp_sent_to_blockchain: Optional[int] = None
+    timestamp_sent_to_exchange: Optional[int] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass

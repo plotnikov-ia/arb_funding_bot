@@ -42,21 +42,23 @@ async def main() -> None:
     
     LOG_ENABLED and log_event("main", action="init blockchain account")
     blockchain_manager = BlockchainManager(secrets=secrets)
-    account_state_blockchain = await blockchain_manager.init_state(BlockchainState())
+    state_blockchain = await blockchain_manager.init_state(BlockchainState())
     
     LOG_ENABLED and log_event("main", action="init hyper account")
     
     hyper_manager = HyperManager(secrets=secrets)
-    account_state_hyper = await hyper_manager.init_state(AccountState(exchange="hyper"))
-    account_data_store_hyper = AccountDataStoreHyper(state=account_state_hyper)
-    account_data_handler_hyper = AccountHandlerHyper(store=account_data_store_hyper)
+    await hyper_manager.set_leverage(asset="ETH")
+    state_hyper = await hyper_manager.init_state(AccountState(exchange="hyper"))
+    store_hyper = AccountDataStoreHyper(state=state_hyper)
+    account_data_handler_hyper = AccountHandlerHyper(store=store_hyper)
     
     LOG_ENABLED and log_event("main", action="init binance account")
     
     binance_manager = BinanceManager(secrets=secrets)
-    account_state_binance = await binance_manager.init_state(AccountState(exchange="binance"))
-    account_data_store_binance = AccountDataStoreBinance(state=account_state_binance)
-    account_data_handler_binance = AccountHandlerBinance(store=account_data_store_binance)
+    await binance_manager.set_leverage(asset="ETHUSDC")
+    state_binance = await binance_manager.init_state(AccountState(exchange="binance"))
+    store_binance = AccountDataStoreBinance(state=state_binance)
+    account_data_handler_binance = AccountHandlerBinance(store=store_binance)
     
     strategy = Strategy(
         blockchain_manager=blockchain_manager,
@@ -86,11 +88,11 @@ async def main() -> None:
     tasks.append(
         asyncio.create_task(
             strategy.step(
-                stop_event,
-                market_data_store,
-                account_state_blockchain,
-                account_data_store_hyper,
-                account_data_store_binance
+                stop_event=stop_event,
+                market_data_store=market_data_store,
+                state_blockchain=state_blockchain,
+                store_binance=store_binance,
+                store_hyper=store_hyper,
             )
         )
     )

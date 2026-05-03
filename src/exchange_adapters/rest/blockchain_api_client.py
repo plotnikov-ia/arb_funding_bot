@@ -150,14 +150,13 @@ class BlockchainApiClient:
         }
     
     async def deposit_hyper(self, amount: int):
-        
         USDC = Web3.to_checksum_address(USDC_ARB_ADDRESS)
         BRIDGE = Web3.to_checksum_address(HYPER_BRIDGE_CONTRACT_ADDRESS)
-        
+
         w3 = Web3(Web3.HTTPProvider(ARB_RPC))
         account = Account.from_key(self.secrets.get("OPERATING_WALLET_PRIVATE_KEY"))
         address = account.address
-        
+
         ERC20_ABI = [
             {
                 "name": "transfer",
@@ -173,16 +172,24 @@ class BlockchainApiClient:
 
         usdc = w3.eth.contract(address=USDC, abi=ERC20_ABI)
 
+        latest_block = w3.eth.get_block("pending")
+        base_fee = latest_block.get("baseFeePerGas", w3.eth.gas_price)
+        priority_fee = w3.to_wei(0.05, "gwei")
+        max_fee = int(base_fee * 2 + priority_fee)
+
         tx = usdc.functions.transfer(BRIDGE, amount).build_transaction({
             "from": address,
-            "nonce": w3.eth.get_transaction_count(address),
+            "nonce": w3.eth.get_transaction_count(address, "pending"),
             "gas": 100000,
-            "gasPrice": w3.eth.gas_price,
+            "maxPriorityFeePerGas": priority_fee,
+            "maxFeePerGas": max_fee,
+            "type": 2,
             "chainId": 42161,
         })
 
-        signed_tx = w3.eth.account.sign_transaction(tx, self.secrets.get("OPERATING_WALLET_PRIVATE_KEY"))
+        signed_tx = w3.eth.account.sign_transaction(
+            tx,
+            self.secrets.get("OPERATING_WALLET_PRIVATE_KEY")
+        )
         tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
-        tx_hash = w3.to_hex(tx_hash)
-    
-    
+        return w3.to_hex(tx_hash)

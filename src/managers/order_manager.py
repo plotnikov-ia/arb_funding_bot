@@ -79,7 +79,7 @@ class OrderManager:
                     is_long=instructions["is_long"],
                     qty=instructions["qty"],
                     limit_price=instructions["price"] + 20 if instructions["is_long"] else instructions["price"] - 20,
-                    cloid=instructions["client_order_id"]
+                    id=instructions["client_order_id"]
                 )
             )
     

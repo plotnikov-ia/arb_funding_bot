@@ -49,7 +49,7 @@ class HyperApiClient:
         is_long: bool,
         qty: float,
         limit_price: float,
-        cloid
+        cloid,
     ):  
         try:
             LOG_ENABLED and log_event("hyper_api_client", action="send taker order")

@@ -129,10 +129,7 @@ class HyperManager:
         self,
         asset: str,
     ):
-        await self.api_client.set_leverage(
-            asset=asset,
-            leverage=LEVERAGE_HYPER,
-        )
+        await self.api_client.set_leverage(asset=asset, leverage=LEVERAGE_HYPER)
         
     async def create_taker_order(
         self,
@@ -140,10 +137,13 @@ class HyperManager:
         is_long: bool,
         qty: float,
         limit_price: float,
-        cloid: str = None
+        id: str = None
     ):  
-        if cloid is None:
+        if id is None:
             raw = keccak(text=str(int(time.time() * 1000)))[:16]
+            cloid = Cloid("0x" + raw.hex())
+        else:
+            raw = keccak(text=id)[:16]
             cloid = Cloid("0x" + raw.hex())
         
         limit_price = round(limit_price, 1)

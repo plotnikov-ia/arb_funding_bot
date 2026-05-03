@@ -26,21 +26,20 @@ class AccountDataStoreBinance:
             self.state.maintenance_margin_requirement = 0
         
     def update_account(self, data):
-        
         timestamp_event = int(data["E"])
         self.state.ts = timestamp_event
         
         if data["a"]["m"] == "DEPOSIT" or data["a"]["m"] == "WITHDRAW":
             for item in data["a"]["B"]:
                 if item["a"] == "USDC":
-                    self.state.quote_position = item["wb"]
+                    self.state.quote_position = float(item["wb"])
                     self.state.equity = self.state.quote_position + self.state.unrealized_pnl
                     return
                     
         if data["a"]["m"] == "FUNDING_FEE":
             for item in data["a"]["B"]:
                 if item["a"] == "USDC":
-                    funding_payment = item["bc"]
+                    funding_payment = float(item["bc"])
                     return
                 
         if data["a"]["m"] == "ORDER":

@@ -42,6 +42,10 @@ class BlockchainManager:
             self.last_state_update_timestamp = now
             asyncio.create_task(self._update_state(state=state))
             
+    async def get_usdc_amount(self):
+        amount_usdc = await self.api_client.get_balance_data()
+        return amount_usdc
+            
     async def _update_state(
         self, 
         state: BlockchainState,
@@ -55,11 +59,11 @@ class BlockchainManager:
         amount_in_usdc: float
     ):
         amount = int(amount_in_usdc * 1_000_000)
-        await self.api_client.deposit(amount=amount)
+        await self.api_client.deposit_hyper(amount=amount)
         
     async def deposit_binance(
         self,
         amount_in_usdc: float,
     ):
         amount_in_usdc = int(amount_in_usdc)
-        data = await self.api_client.deposit(amount=amount_in_usdc)
+        data = await self.api_client.deposit_binance(amount=amount_in_usdc)
