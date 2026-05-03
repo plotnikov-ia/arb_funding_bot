@@ -31,7 +31,7 @@ class RiskManager:
         self.allowed_long_binance = False
         self.allowed_short_binance = False
         
-        self.deal_size = 0.02
+        self.deal_size = 0.1
         
         self.risk_mode = RiskMode.NORMAL
         self.active_rebalance = None
