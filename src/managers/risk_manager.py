@@ -65,6 +65,10 @@ class RiskManager:
             unrealized_pnl=state_hyper.unrealized_pnl, MMF_pct=(MMF_HYPER * 100)
         )
         
+        if state_binance.margin_ratio > MARGIN_RATIO_REBALANCE_TH and state_hyper.margin_ratio > MARGIN_RATIO_REBALANCE_TH:
+            self.risk_mode = RiskMode.NORMAL
+            return
+        
         if state_binance.margin_ratio < MARGIN_RATIO_REBALANCE_TH or state_hyper.margin_ratio < MARGIN_RATIO_REBALANCE_TH:
             self.risk_mode = RiskMode.REBALANCE
             self.prepare_rebalance(state_binance=state_binance, state_hyper=state_hyper, state_blockchain=state_blockchain, mid_price=mid_price)
@@ -184,16 +188,16 @@ class RiskManager:
         margin_ratio_condition = hypo_margin_ratio_binance > MARGIN_RATIO_TARGET and hypo_margin_ratio_hyper > MARGIN_RATIO_TARGET
         
         
-        # if position_condition and margin_usage_condition and margin_ratio_condition:
-        #     self.allowed_long_binance = True
-        # else:
-        #     self.allowed_long_binance = False    
+        if position_condition and margin_usage_condition and margin_ratio_condition:
+            self.allowed_long_binance = True
+        else:
+            self.allowed_long_binance = False    
             
         # ------ скрутить позицию ------
-        if state_binance.base_position > 0:
-            self.allowed_short_binance = True
-        else:
-            self.allowed_short_binance = False
+        # if state_binance.base_position > 0:
+        #     self.allowed_short_binance = True
+        # else:
+        #     self.allowed_short_binance = False
         # ------------------------------
         
         
