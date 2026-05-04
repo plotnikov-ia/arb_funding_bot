@@ -65,6 +65,16 @@ class RiskManager:
             unrealized_pnl=state_hyper.unrealized_pnl, MMF_pct=(MMF_HYPER * 100)
         )
         
+        state_binance.margin_usage = self.calc_margin_usage(
+            mid_price=mid_price, base_position=state_binance.base_position, quote_position=state_binance.quote_position, 
+            unrealized_pnl=state_binance.unrealized_pnl, IMF_pct=(IMF_BINANCE * 100)
+        )
+        
+        state_hyper.margin_usage = self.calc_margin_usage(
+            mid_price=mid_price, base_position=state_hyper.base_position, quote_position=state_hyper.quote_position, 
+            unrealized_pnl=state_hyper.unrealized_pnl, IMF_pct=(IMF_HYPER * 100)
+        )
+        
         if state_binance.margin_ratio > MARGIN_RATIO_REBALANCE_TH and state_hyper.margin_ratio > MARGIN_RATIO_REBALANCE_TH:
             self.risk_mode = RiskMode.NORMAL
             return

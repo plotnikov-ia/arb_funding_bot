@@ -29,6 +29,8 @@ class AccountState:
 
     initial_margin_requirement: Optional[float] = None
     maintenance_margin_requirement: Optional[float] = None
+    
+    margin_usage: Optional[float] = 0
     margin_ratio: Optional[float] = 1e+6
 
     quote_position_spot: Optional[float] = None
@@ -57,7 +59,9 @@ class AccountState:
             f"\n"
             f"Initial margin:        {fmt(self.initial_margin_requirement)}\n"
             f"Maintenance margin:    {fmt(self.maintenance_margin_requirement)}\n"
+            f"\n"
             f"Margin ration:         {fmt(self.margin_ratio)}\n"
+            f"Margin usage:         {fmt(self.margin_usage)}\n"
         )
 
     def to_dict(self) -> Dict[str, Any]:

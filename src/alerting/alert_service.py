@@ -42,17 +42,21 @@ class AlertTradingService:
             message = textwrap.dedent(f"""
                 🟡 --- Binance ---
                 margin ratio: {state_binance.margin_ratio:.2f}
+                margin usage: {state_binance.margin_usage:.2f}
                 equity: {state_binance.equity:.2f}
                 quote_position: {state_binance.quote_position:.2f}
                 base_position: {state_binance.base_position:.2f}
+                unrealized_pnl: {state_binance.unrealized_pnl:.2f}
                 quote_position_spot: {state_binance.quote_position_spot:.2f}
                 locked_quote_position_spot: {state_binance.locked_quote_position_spot:.2f}
 
                 🟢 --- Hyperliquid ---
                 margin ratio: {state_hyper.margin_ratio:.2f}
+                margin usage: {state_hyper.margin_usage:.2f}
                 equity: {state_hyper.equity:.2f}
                 quote_position: {state_hyper.quote_position:.2f}
                 base_position: {state_hyper.base_position:.2f}
+                unrealized_pnl: {state_hyper.unrealized_pnl:.2f}
 
                 🔵 --- Blockchain ---
                 amount usdc: {state_blockchain.amount_usdc:.2f}
